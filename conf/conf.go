@@ -25,6 +25,10 @@ var defaultConfigPaths = []string{
 	"/etc/tork/config.toml",
 }
 
+func SetConfig(koanf2 *koanf.Koanf) {
+	konf = koanf2
+}
+
 func LoadConfig() (*koanf.Koanf, error) {
 	var paths []string
 	userConfig := os.Getenv("TORK_CONFIG")
