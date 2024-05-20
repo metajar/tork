@@ -360,6 +360,7 @@ func (d *DockerRuntime) doRun(ctx context.Context, t *tork.Task, logger io.Write
 			return err
 		}
 	case status := <-statusCh:
+		stdout, _ := d.readOutput(ctx, resp.ID)
 		if status.StatusCode != 0 { // error
 			out, err := d.client.ContainerLogs(
 				ctx,
@@ -378,7 +379,7 @@ func (d *DockerRuntime) doRun(ctx context.Context, t *tork.Task, logger io.Write
 			if err != nil {
 				log.Error().Err(err).Msg("error copying the output")
 			}
-			return errors.Errorf("exit code %d: %s", status.StatusCode, string(buf))
+			return fmt.Errorf("exit code %d: %s\nstdout:\n%s", status.StatusCode, string(buf), string(stdout))
 		} else {
 			stdout, err := d.readOutput(ctx, resp.ID)
 			if err != nil {
