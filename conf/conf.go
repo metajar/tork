@@ -25,7 +25,7 @@ var defaultConfigPaths = []string{
 	"/etc/tork/config.toml",
 }
 
-func LoadConfig() error {
+func LoadConfig() (*koanf.Koanf, error) {
 	var paths []string
 	userConfig := os.Getenv("TORK_CONFIG")
 	if userConfig != "" {
@@ -41,23 +41,23 @@ func LoadConfig() error {
 			continue
 		}
 		if err != nil {
-			return errors.Wrapf(err, "error loading config from %s", f)
+			return nil, errors.Wrapf(err, "error loading config from %s", f)
 		}
 		logger.Info().Msgf("Config loaded from %s", f)
 		loaded = true
 		break
 	}
 	if !loaded && userConfig != "" {
-		return errors.Errorf(fmt.Sprintf("could not find config file in: %s", userConfig))
+		return nil, errors.Errorf(fmt.Sprintf("could not find config file in: %s", userConfig))
 	}
 	// load configs from env vars
 	if err := konf.Load(env.Provider("TORK_", ".", func(s string) string {
 		return strings.Replace(strings.ToLower(
 			strings.TrimPrefix(s, "TORK_")), "_", ".", -1)
 	}), nil); err != nil {
-		return errors.Wrapf(err, "error loading config from env")
+		return nil, errors.Wrapf(err, "error loading config from env")
 	}
-	return nil
+	return konf, nil
 }
 
 func IntMap(key string) map[string]int {
